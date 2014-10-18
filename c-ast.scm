@@ -13,10 +13,7 @@
 ;;  You should have received a copy of the GNU General Public License
 ;;  along with this program.  If not, see <http://www.gnu.org/licenses/>
 (define-module (c-ast)
-  #:export (stmt->string
-            stmt->iol
-            expr->string
-            expr->iol))
+  #:export (ast->iol))
 
 (use-modules (ice-9 match)
              (iol))
@@ -88,3 +85,9 @@
 (define (ast->string ->iol ast) (iol->string (->iol ast)))
 (define (stmt->string stmt) (ast->string stmt->iol stmt))
 (define (expr->string expr) (ast->string expr->iol expr))
+
+(define (ast->iol type ast)
+  ((match type
+    ('stmt stmt->iol)
+    ('expr 'expr->iol))
+   ast))

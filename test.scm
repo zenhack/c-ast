@@ -49,11 +49,11 @@
 
 (define-syntax tests
   (syntax-rules ()
-    ((tests (str ast) ...)
+    ((tests (type str ast) ...)
      (list
        (lambda ()
          (let ((istr (indent-iol str))
-               (iast (indent-iol (stmt->iol ast))))
+               (iast (indent-iol (ast->iol 'type ast))))
            (if (equal? iast istr)
              'pass
              `(ast-format-stmt
@@ -63,7 +63,8 @@
 
 (define *tests*
   (tests
-    ("while (x>1) {
+    (stmt
+     "while (x>1) {
          if ((x % 2) == 0) {
              4;
              (x = 82);
