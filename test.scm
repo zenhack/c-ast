@@ -92,11 +92,22 @@
                 4
                 (= x 82))
               7))))
+       (decl
+         "int"
+         'int)
+       (decl
+         "int x"
+         '(decl x int))
+       (decl
+         "int main(void)"
+         '(decl main (func int void)))
+       (decl
+         "int max(int, int)"
+         '(decl max (func int int int)))
        (expr "4" 4)
     )
     (iol-eq-tests
       ("a,b,c" (join-iol "," '("a" "b" "c")))
     )))
-
 
 (write (map (lambda (f) (f)) *tests*))

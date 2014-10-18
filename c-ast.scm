@@ -32,6 +32,18 @@
     ;; just print directly:
     (expr expr)))
 
+(define (decl->iol var ast)
+  (match ast
+    (('decl newvar newast) (decl->iol newvar newast))
+    (('ptr ('decl newvar type))
+     (decl->iol newvar `(ptr ,type)))
+    (('ptr ('func . args)) (decl->iol (list "(*" var ")") (cons 'func args) ))
+    (('func out-type . in-types)
+     (list (decl->iol "" out-type) var "("
+           (join-iol "," (map (lambda (type) decl->iol "" type) in-types))
+           ")"))
+    (sym (list sym " " var))))
+
 (define stmt->iol
   (match-lambda
     (('while test body)
@@ -89,5 +101,6 @@
 (define (ast->iol type ast)
   ((match type
     ('stmt stmt->iol)
-    ('expr expr->iol))
+    ('expr expr->iol)
+    ('decl (lambda (ast) (decl->iol "" ast))))
    ast))
