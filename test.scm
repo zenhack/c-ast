@@ -59,7 +59,7 @@
              `(ast-eq
                 (input-ast ,ast)
                 (expected ,istr)
-                (actual ,iast)))) ...)))))
+                (actual ,iast))))) ...))))
 
 (define-syntax iol-eq-tests
   (syntax-rules ()
