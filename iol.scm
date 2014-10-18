@@ -25,7 +25,10 @@
 (define-module (iol)
   #:export (iol->string
             iter-iol
+            join-iol
             display-iol))
+
+(use-modules (ice-9 match))
 
 (define (iol->string iol)
   "Convert iol to a string."
@@ -50,3 +53,8 @@
 (define (display-iol iol)
   "Output iol to current-output-port."
   (iter-iol (lambda (str) (format #t "~a" str)) iol))
+
+(define (join-iol sep lst)
+  (match lst
+    ((one two . more) (list one sep (join-iol sep (cons two more))))
+    (other other)))

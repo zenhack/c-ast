@@ -47,38 +47,55 @@
         (close-pipe pipe)
         text)))
 
-(define-syntax tests
+(define-syntax ast-eq-tests
   (syntax-rules ()
-    ((tests (type str ast) ...)
+    ((ast-eq-tests (type str ast) ...)
      (list
        (lambda ()
          (let ((istr (indent-iol str))
                (iast (indent-iol (ast->iol 'type ast))))
            (if (equal? iast istr)
              'pass
-             `(ast-format-stmt
+             `(ast-eq
                 (input-ast ,ast)
                 (expected ,istr)
                 (actual ,iast)))) ...)))))
 
+(define-syntax iol-eq-tests
+  (syntax-rules ()
+    ((ast-eq-tests (expected actual) ...)
+     (list (lambda ()
+             (let ((expected-string (iol->string actual))
+                   (actual-string (iol->string actual)))
+               (if (equal? expected-string actual-string)
+                 'pass
+                 `(iol-eq
+                    (input ,actual)
+                    (expected ,expected-string)
+                    (actual ,actual-string))))) ...))))
+
 (define *tests*
-  (tests
-    (stmt
-     "while (x>1) {
-         if ((x % 2) == 0) {
-             4;
-             (x = 82);
-         } else
-             7;
-     }"
-    '(while (> x 1)
-      (begin
-        (if (== (% x 2) 0)
-            (begin
-              4
-              (= x 82))
-            7))))
-  ))
+  (append
+    (ast-eq-tests
+      (stmt
+       "while (x>1) {
+           if ((x % 2) == 0) {
+               4;
+               (x = 82);
+           } else
+               7;
+       }"
+      '(while (> x 1)
+        (begin
+          (if (== (% x 2) 0)
+              (begin
+                4
+                (= x 82))
+              7))))
+    )
+    (iol-eq-tests
+      ("a,b,c" (join-iol "," '("a" "b" "c")))
+    )))
 
 
 (write (map (lambda (f) (f)) *tests*))
