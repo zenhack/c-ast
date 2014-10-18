@@ -54,16 +54,12 @@
        (lambda ()
          (let ((istr (indent-iol str))
                (iast (indent-iol (stmt->iol ast))))
-           (unless (equal? iast istr)
-             (format #t
-"FAILED!
-AST:
-~a
-EXPECTED:
-~a
-ACTUAL:
-~a
-" ast istr iast)))) ...))))
+           (if (equal? iast istr)
+             'pass
+             `(ast-format-stmt
+                (input-ast ,ast)
+                (expected ,istr)
+                (actual ,iast)))) ...)))))
 
 (define *tests*
   (tests
@@ -84,4 +80,4 @@ ACTUAL:
   ))
 
 
-(map (lambda (f) (f)) *tests*)
+(write (map (lambda (f) (f)) *tests*))
