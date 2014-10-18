@@ -92,6 +92,7 @@
                 4
                 (= x 82))
               7))))
+       (expr "4" 4)
     )
     (iol-eq-tests
       ("a,b,c" (join-iol "," '("a" "b" "c")))
