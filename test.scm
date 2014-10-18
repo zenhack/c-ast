@@ -63,7 +63,7 @@
 
 (define-syntax iol-eq-tests
   (syntax-rules ()
-    ((ast-eq-tests (expected actual) ...)
+    ((iol-eq-tests (expected actual) ...)
      (list (lambda ()
              (let ((expected-string (iol->string actual))
                    (actual-string (iol->string actual)))
