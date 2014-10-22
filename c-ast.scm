@@ -75,10 +75,10 @@
               `(if ,test-2 ,action-2 ,@rest)))))
 
     (('switch expr . cases)
-     (list " switch " (expr->iol expr) "{"
+     (list " switch (" (expr->iol expr) ") {"
            (map case->iol cases)
            "}"))
-    (('goto label-name) (list " goto " label-name))
+    (('goto label-name) (list " goto " label-name ";"))
     (('label label-name) (list label-name ":"))
 
     ('break "break;")
@@ -89,10 +89,10 @@
 (define case->iol (match-lambda
   (('default . body)
    (list " default: "
-    (stmt->iol `(begin ,body))))
+    (stmt->iol (cons 'begin body))))
   ((expr . body)
-   (list "case"
-    (expr->iol expr) ": " (stmt->iol `(begin ,body))))))
+   (list " case "
+    (expr->iol expr) ": " (stmt->iol (cons 'begin body))))))
 
 (define (ast->string ->iol ast) (iol->string (->iol ast)))
 (define (stmt->string stmt) (ast->string stmt->iol stmt))

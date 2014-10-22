@@ -78,6 +78,12 @@
   (append
     (ast-eq-tests
       (stmt
+        "(x = 1);"
+        '(= x 1))
+      (stmt
+        "goto fail;"
+        '(goto fail))
+      (stmt
        "while (x>1) {
            if ((x % 2) == 0) {
                4;
@@ -92,6 +98,21 @@
                 4
                 (= x 82))
               7))))
+      (stmt
+        "switch (x) {
+           case 4: {
+             (x = 1);
+             break;
+           } default: {
+             (x = 4);
+           }
+         }"
+         '(switch x
+            (4
+              (= x 1)
+              break)
+            (default
+              (= x 4))))
       (decl
         "int"
         'int)
