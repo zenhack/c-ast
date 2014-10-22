@@ -110,4 +110,5 @@
       ("a,b,c" (join-iol "," '("a" "b" "c")))
     )))
 
-(write (map (lambda (f) (f)) *tests*))
+(write (filter (lambda (ret) (not (equal? ret 'pass)))
+               (map (lambda (f) (f)) *tests*)))
