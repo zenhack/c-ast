@@ -132,6 +132,26 @@
       (expr
         "(1?2:3)"
         '(if 1 2 3))
+      (def
+        "int x = 1;"
+        '(def x int 1))
+      (def
+        "int main() {}"
+        '(def main (func int)))
+      (def
+        "int main() {
+          (x = 1);
+         }"
+         '(def main (func int)
+               (= x 1)))
+      (def
+        "int main(void) {
+           (x = 0);
+           (y = 1);
+         }"
+         '(def main (func int void)
+               (= x 0)
+               (= y 1)))
     )
     (iol-eq-tests
       ("a,b,c" (join-iol "," '("a" "b" "c")))

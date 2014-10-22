@@ -44,6 +44,13 @@
            ")"))
     (sym (list sym " " var))))
 
+(define def->iol
+  (match-lambda
+    (('def var ('func . ret/args) . body)
+     (list (decl->iol var (cons 'func ret/args)) (stmt->iol (cons 'begin body))))
+    (('def var type val)
+     (list (decl->iol var type) " = " (expr->iol val) ";"))))
+
 (define stmt->iol
   (match-lambda
     (('while test body)
@@ -102,5 +109,6 @@
   ((match type
     ('stmt stmt->iol)
     ('expr expr->iol)
-    ('decl (lambda (ast) (decl->iol "" ast))))
+    ('decl (lambda (ast) (decl->iol "" ast)))
+    ('def def->iol))
    ast))
