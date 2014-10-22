@@ -87,6 +87,7 @@
            "}"))
     (('goto label-name) (list " goto " label-name ";"))
     (('label label-name) (list label-name ":"))
+    (('return expr) (list "return " (expr->iol expr) ";"))
 
     ('break "break;")
     ('continue "continue;")

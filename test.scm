@@ -84,6 +84,9 @@
         "goto fail;"
         '(goto fail))
       (stmt
+        "return -1;"
+        '(return -1))
+      (stmt
        "while (x>1) {
            if ((x % 2) == 0) {
                4;
@@ -144,6 +147,12 @@
          }"
          '(def main (func int)
                (= x 1)))
+      (def
+        "int main(void) {
+          return 0;
+        }"
+        '(def main (func int void)
+              (return 0)))
       (def
         "int main(void) {
            (x = 0);
