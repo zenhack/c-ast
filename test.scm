@@ -105,6 +105,12 @@
         "int max(int, int)"
         '(decl max (func int int int)))
       (expr "4" 4)
+      (expr
+        "(x = 1)"
+        '(= x 1))
+      (expr
+        "(1?2:3)"
+        '(if 1 2 3))
     )
     (iol-eq-tests
       ("a,b,c" (join-iol "," '("a" "b" "c")))
