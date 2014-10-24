@@ -13,10 +13,23 @@
 ;;  You should have received a copy of the GNU General Public License
 ;;  along with this program.  If not, see <http://www.gnu.org/licenses/>
 (define-module (c-ast)
-  #:export (ast->iol))
+  #:export (ast->iol
+            c-escape-string))
 
 (use-modules (ice-9 match)
              (iol))
+
+(define (c-escape-string s)
+  (list "\"" (string-fold (lambda (ch acc)
+                            (list acc
+                              (match ch
+                                (#\"       "\\\"")
+                                (#\newline "\\n")
+                                (#\tab     "\\t")
+                                (#\\       "\\\\")
+                                (other     other))))
+                            '()
+                            s) "\""))
 
 (define (parens . expr) `("(" ,expr ")"))
 
