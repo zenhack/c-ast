@@ -15,4 +15,4 @@
 check:
 	guile -L . test.scm
 clean:
-	rm -rf _test_work_*
+	rm -rf _test_work_* *_gen.[co]
