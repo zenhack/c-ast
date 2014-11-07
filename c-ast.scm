@@ -115,12 +115,19 @@
    (list " case "
     (expr->iol expr) ": " (stmt->iol (cons 'begin body))))))
 
+(define toplevel->iol (match-lambda
+  (('!define sym) (list "\n#define " sym))
+  (('!include<> filename) (list "\n#include <" filename ">\n"))
+  (('!include filename) (list "\n#include \"" filename "\""))
+  (('def . rest) (def->iol (cons 'def rest)))))
+
 (define (ast->string ->iol ast) (iol->string (->iol ast)))
 (define (stmt->string stmt) (ast->string stmt->iol stmt))
 (define (expr->string expr) (ast->string expr->iol expr))
 
 (define (ast->iol type ast)
   ((match type
+    ('toplevel toplevel->iol)
     ('stmt stmt->iol)
     ('expr expr->iol)
     ('decl (lambda (ast) (decl->iol "" ast)))
