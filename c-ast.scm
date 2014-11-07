@@ -39,11 +39,17 @@
      (parens (expr->iol test) "?"
              (expr->iol true) ":"
              (expr->iol false)))
+    (('call func . args)
+     (list (parens (expr->iol func))
+           (parens (join-iol ", " (map expr->iol args)))))
     ((op lhs rhs)
      (parens (expr->iol lhs) op (expr->iol rhs)))
-    ;; We're assuming that anything else is going to be a raw atom that we can
-    ;; just print directly:
-    (expr expr)))
+    (expr
+      (if (string? expr)
+        (c-escape-string expr)
+        ;; We're assuming that anything else is going to be a raw atom that we
+        ;; can just print directly:
+        expr))))
 
 (define (decl->iol var ast)
   (match ast
