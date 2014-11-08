@@ -14,7 +14,7 @@ Into C source code:
 ...which can then be fed through a C compiler.
 
 This is interesting because it allows use of scheme to easily manipulate
-C programs -- many the same benefits of a proper list-style macro system
+C programs -- many the same benefits of a proper lisp-style macro system
 can be used to write low-level code.
 
 The intention is for this to be a building block for building other
