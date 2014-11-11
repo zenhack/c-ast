@@ -42,8 +42,12 @@
     (('call func . args)
      (list (parens (expr->iol func))
            (parens (join-iol ", " (map expr->iol args)))))
+    (('@ arr index)
+     (list (expr->iol arr) "[" (expr->iol index) "]"))
     ((op lhs rhs)
      (parens (expr->iol lhs) op (expr->iol rhs)))
+    ((op arg)
+     (parens op (parens arg)))
     (expr
       (if (string? expr)
         (c-escape-string expr)
