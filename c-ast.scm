@@ -60,10 +60,11 @@
     (('decl newvar newast) (decl->iol newvar newast))
     (('ptr ('decl newvar type))
      (decl->iol newvar `(ptr ,type)))
-    (('ptr ('func . args)) (decl->iol (list "(*" var ")") (cons 'func args) ))
+    (('ptr ('func . args)) (decl->iol (list "(*" var ")") (cons 'func args)))
+    (('ptr type) (decl->iol (list "*" var) type))
     (('func out-type . in-types)
      (list (decl->iol "" out-type) var "("
-           (join-iol "," (map (lambda (type) decl->iol "" type) in-types))
+           (join-iol "," (map (lambda (type) (decl->iol "" type)) in-types))
            ")"))
     (sym (list sym " " var))))
 

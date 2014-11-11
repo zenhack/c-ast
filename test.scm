@@ -116,6 +116,12 @@
               break)
             (default
               (= x 4))))
+        (stmt
+          "int x = 1;"
+          '(def x int 1))
+        (stmt
+          "int x;"
+          '(decl x int))
       (decl
         "int"
         'int)
@@ -128,6 +134,18 @@
       (decl
         "int max(int, int)"
         '(decl max (func int int int)))
+      (decl
+        "int *x"
+        '(decl x (ptr int)))
+      (decl
+        "char **argv"
+        '(decl argv (ptr (ptr char))))
+      (decl
+        "void *malloc()"
+        '(decl malloc (func (ptr void))))
+      (decl
+        "void ptrarg(void *)"
+        '(decl ptrarg (func void (ptr void))))
       (expr "4" 4)
       (expr
         "(x = 1)"
@@ -135,9 +153,24 @@
       (expr
         "(1?2:3)"
         '(if 1 2 3))
+      (expr
+        "(x += 4)"
+        '(+= x 4))
+      (expr
+        "(*(x))"
+        '(* x))
+      (expr
+        "(&(x))"
+        '(& x))
+      (expr
+        "argv[2]"
+        '(@ argv 2))
       (def
         "int x = 1;"
         '(def x int 1))
+      (def
+        "int *x = NULL;"
+        '(def x (ptr int) NULL))
       (def
         "int main() {}"
         '(def main (func int)))
