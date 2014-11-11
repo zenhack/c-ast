@@ -114,6 +114,8 @@
 
     ('break "break;")
     ('continue "continue;")
+    (('decl . rest) (list (decl->iol "" (cons 'decl rest)) ";"))
+    (('def . rest) (def->iol (cons 'def rest)))
 
     (expr (list (expr->iol expr) ";"))))
 
