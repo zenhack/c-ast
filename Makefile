@@ -15,4 +15,8 @@
 check:
 	guile -L . test.scm
 clean:
-	rm -rf _test_work_* *_gen.[co]
+	rm -rf _test_work_* *_gen.[co] \
+		hello-world \
+		cat
+%: examples/%.scm
+	guile $<
