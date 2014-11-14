@@ -79,7 +79,9 @@
 (define stmt->iol
   (match-lambda
     (('while test body)
-     (list " while " (expr->iol test) (stmt->iol body)))
+     (list " while " (parens (expr->iol test)) (stmt->iol body)))
+    (('while test)
+     (list " while " (parens (expr->iol test)) ";"))
     (('begin . body)
      (list "{" (map stmt->iol body) "}"))
     (('do-while body test)
