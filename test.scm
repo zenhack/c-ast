@@ -146,6 +146,9 @@
       (decl
         "void ptrarg(void *)"
         '(decl ptrarg (func void (ptr void))))
+      (decl
+        "int main(int argc, char **argv)"
+        '(decl main (func int (argc int) (argv (ptr (ptr char))))))
       (expr "4" 4)
       (expr
         "(x = 1)"

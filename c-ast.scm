@@ -66,6 +66,7 @@
      (list (decl->iol "" out-type) var "("
            (join-iol "," (map (lambda (type) (decl->iol "" type)) in-types))
            ")"))
+    ((name type) (decl->iol name type))
     (sym (list sym " " var))))
 
 (define def->iol
