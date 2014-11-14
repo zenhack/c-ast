@@ -19,17 +19,19 @@
 (use-modules (ice-9 match)
              (iol))
 
+(define c-escape-char
+  (match-lambda
+    ;; This needs to escape both ' and " always, since it may be used for either
+    ;; char literals or string literals.
+    (#\"       "\\\"")
+    (#\'       "\\'")
+    (#\newline "\\n")
+    (#\tab     "\\t")
+    (#\\       "\\\\")
+    (other     other)))
+
 (define (c-escape-string s)
-  (list "\"" (string-fold (lambda (ch acc)
-                            (list acc
-                              (match ch
-                                (#\"       "\\\"")
-                                (#\newline "\\n")
-                                (#\tab     "\\t")
-                                (#\\       "\\\\")
-                                (other     other))))
-                            '()
-                            s) "\""))
+  (list "\"" (string-fold c-escape-char '() s) "\""))
 
 (define (parens . expr) `("(" ,expr ")"))
 
@@ -49,11 +51,12 @@
     ((op arg)
      (parens op (parens arg)))
     (expr
-      (if (string? expr)
-        (c-escape-string expr)
+      (cond
+        ((string? expr) (c-escape-string expr))
+        ((char? expr) (list "'" (c-escape-char expr) "'"))
         ;; We're assuming that anything else is going to be a raw atom that we
         ;; can just print directly:
-        expr))))
+        (#t expr)))))
 
 (define (decl->iol var ast)
   (match ast

@@ -157,6 +157,8 @@
         "int main(int argc, char **argv)"
         '(decl main (func int (argc int) (argv (ptr (ptr char))))))
       (expr "4" 4)
+      (expr "'c'" #\c)
+      (expr "'\\n'" #\newline)
       (expr
         "(x = 1)"
         '(= x 1))
