@@ -105,11 +105,14 @@
            " else "
             (stmt->iol false)))
     (('if test-1 action-1 test-2 action-2 . rest)
+     (begin
+       (write `(if ,test-1 ,action-1 ,test-2 ,action-2 ,@rest))
+       (exit)
       (stmt->iol
         ('if test-1
           (stmt->iol action-1)
             (stmt->iol
-              `(if ,test-2 ,action-2 ,@rest)))))
+              `(if ,test-2 ,action-2 ,@rest))))))
 
     (('switch expr . cases)
      (list " switch (" (expr->iol expr) ") {"
@@ -135,9 +138,11 @@
     (expr->iol expr) ": " (stmt->iol (cons 'begin body))))))
 
 (define toplevel->iol (match-lambda
+  (('begin . toplevels) (map toplevel->iol toplevels))
   (('!define sym) (list "\n#define " sym))
   (('!include<> filename) (list "\n#include <" filename ">\n"))
   (('!include filename) (list "\n#include \"" filename "\""))
+  (('decl . rest) (decl->iol "" (cons 'decl rest)))
   (('def . rest) (def->iol (cons 'def rest)))))
 
 (define (ast->string ->iol ast) (iol->string (->iol ast)))
