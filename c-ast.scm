@@ -31,7 +31,7 @@
     (other     other)))
 
 (define (c-escape-string s)
-  (list "\"" (string-fold c-escape-char '() s) "\""))
+  (list "\"" (map c-escape-char (string->list s)) "\""))
 
 (define (parens . expr) `("(" ,expr ")"))
 
