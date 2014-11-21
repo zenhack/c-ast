@@ -88,7 +88,7 @@
         '(return -1))
       (stmt
        "while ((x>1)) {
-           if ((x % 2) == 0) {
+           if (((x % 2) == 0)) {
                4;
                (x = 82);
            } else
@@ -108,6 +108,9 @@
         "while (1) {
         }"
         '(while 1 (begin)))
+      (stmt
+        "while((x != 4)) (x = 4);"
+        '(while (!= x 4) (= x 4)))
       (stmt
         "switch (x) {
            case 4: {
@@ -206,6 +209,9 @@
          '(def main (func int void)
                (= x 0)
                (= y 1)))
+      (toplevel
+        "int x;"
+        '(decl x int))
     )
     (iol-eq-tests
       ("a,b,c" (join-iol "," '("a" "b" "c")))

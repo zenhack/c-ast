@@ -49,7 +49,7 @@
     ((op lhs rhs)
      (parens (expr->iol lhs) op (expr->iol rhs)))
     ((op arg)
-     (parens op (parens arg)))
+     (parens op (parens (expr->iol arg))))
     (expr
       (cond
         ((string? expr) (c-escape-string expr))
@@ -96,23 +96,8 @@
                (expr->iol incr) ")"
         (stmt->iol body)))
 
-    (('if test true)
-     (list " if " (expr->iol test)
-           (stmt->iol true)))
-    (('if test true false)
-     (list " if " (expr->iol test)
-            (stmt->iol true)
-           " else "
-            (stmt->iol false)))
-    (('if test-1 action-1 test-2 action-2 . rest)
-     (begin
-       (write `(if ,test-1 ,action-1 ,test-2 ,action-2 ,@rest))
-       (exit)
-      (stmt->iol
-        ('if test-1
-          (stmt->iol action-1)
-            (stmt->iol
-              `(if ,test-2 ,action-2 ,@rest))))))
+    (('if . rest)
+     (if->iol rest))
 
     (('switch expr . cases)
      (list " switch (" (expr->iol expr) ") {"
@@ -129,6 +114,18 @@
 
     (expr (list (expr->iol expr) ";"))))
 
+(define if->iol
+  (match-lambda
+    ((test iftrue)
+     (list "if " (parens (expr->iol test)) (stmt->iol iftrue)))
+    ((test iftrue iffalse)
+     (list "if " (parens (expr->iol test))
+              (stmt->iol iftrue)
+           " else "
+              (stmt->iol iffalse)))
+    ((test1 action1 test2 . rest)
+     (if->iol (list test1 action1 (if->iol (cons  test2 rest)))))))
+
 (define case->iol (match-lambda
   (('default . body)
    (list " default: "
@@ -142,7 +139,7 @@
   (('!define sym) (list "\n#define " sym))
   (('!include<> filename) (list "\n#include <" filename ">\n"))
   (('!include filename) (list "\n#include \"" filename "\""))
-  (('decl . rest) (decl->iol "" (cons 'decl rest)))
+  (('decl . rest) (list (decl->iol "" (cons 'decl rest)) ";"))
   (('def . rest) (def->iol (cons 'def rest)))))
 
 (define (ast->string ->iol ast) (iol->string (->iol ast)))

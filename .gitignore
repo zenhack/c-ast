@@ -3,3 +3,4 @@ _test_work_*
 *_gen.[co]
 hello-world
 cat
+wc

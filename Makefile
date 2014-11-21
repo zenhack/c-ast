@@ -17,6 +17,7 @@ check:
 clean:
 	rm -rf _test_work_* *_gen.[co] \
 		hello-world \
-		cat
+		cat \
+		wc
 %: examples/%.scm
 	guile $<
