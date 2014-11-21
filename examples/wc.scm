@@ -37,17 +37,17 @@
                      chars words lines)
                (begin
                  (if print_chars
-                   (call printf "chars: %d\n"))
+                   (call printf "chars: %d\n" chars))
                  (if print_words
-                   (call printf "words: %d\n"))
+                   (call printf "words: %d\n" words))
                  (if print_lines
-                   (call printf "lines: %d\n")))))
+                   (call printf "lines: %d\n" lines)))))
 
 
         (def main (func int (argc int) (argv (ptr (ptr char))))
              (decl i int)
              (def have_file int 0)
-             (for ((= i 0) (< i argc) (++ i))
+             (for ((= i 1) (< i argc) (++ i))
                (begin
                  (if ,@(apply append (map check-flag `((chars "-c")
                                                        (words "-w")
