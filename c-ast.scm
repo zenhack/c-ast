@@ -16,8 +16,10 @@
   #:export (ast->iol
             c-escape-string))
 
+
 (use-modules (ice-9 match)
              (iol))
+
 
 (define c-escape-char
   (match-lambda
@@ -30,10 +32,13 @@
     (#\\       "\\\\")
     (other     other)))
 
+
 (define (c-escape-string s)
   (list "\"" (map c-escape-char (string->list s)) "\""))
 
+
 (define (parens . expr) `("(" ,expr ")"))
+
 
 (define expr->iol
   (match-lambda
@@ -58,6 +63,7 @@
         ;; can just print directly:
         (#t expr)))))
 
+
 (define (decl->iol var ast)
   (match ast
     (('decl newvar newast) (decl->iol newvar newast))
@@ -72,12 +78,14 @@
     ((name type) (decl->iol name type))
     (sym (list sym " " var))))
 
+
 (define def->iol
   (match-lambda
     (('def var ('func . ret/args) . body)
      (list (decl->iol var (cons 'func ret/args)) (stmt->iol (cons 'begin body))))
     (('def var type val)
      (list (decl->iol var type) " = " (expr->iol val) ";"))))
+
 
 (define stmt->iol
   (match-lambda
@@ -91,8 +99,10 @@
 
     (('begin . body)
      (list "{" (map stmt->iol body) "}"))
+
     (('do-while body test)
      (list " do " (stmt->iol body) " while " (stmt->iol test) ";"))
+
     (('for (init test incr) body)
      (list
        " for(" (expr->iol init) ";"
@@ -107,28 +117,33 @@
      (list " switch (" (expr->iol expr) ") {"
            (map case->iol cases)
            "}"))
+
     (('goto label-name) (list " goto " label-name ";"))
     (('label label-name) (list label-name ":"))
     (('return expr) (list "return " (expr->iol expr) ";"))
-
     ('break "break;")
     ('continue "continue;")
+
     (('decl . rest) (list (decl->iol "" (cons 'decl rest)) ";"))
     (('def . rest) (def->iol (cons 'def rest)))
 
     (expr (list (expr->iol expr) ";"))))
 
+
 (define if->iol
   (match-lambda
     ((test iftrue)
      (list "if " (parens (expr->iol test)) (stmt->iol iftrue)))
+
     ((test iftrue iffalse)
      (list "if " (parens (expr->iol test))
               (stmt->iol iftrue)
            " else "
               (stmt->iol iffalse)))
+
     ((test1 action1 test2 . rest)
      (if->iol (list test1 action1 (if->iol (cons  test2 rest)))))))
+
 
 (define case->iol (match-lambda
   (('default . body)
@@ -138,6 +153,7 @@
    (list " case "
     (expr->iol expr) ": " (stmt->iol (cons 'begin body))))))
 
+
 (define toplevel->iol (match-lambda
   (('begin . toplevels) (map toplevel->iol toplevels))
   (('!define sym) (list "\n#define " sym))
@@ -146,9 +162,11 @@
   (('decl . rest) (list (decl->iol "" (cons 'decl rest)) ";"))
   (('def . rest) (def->iol (cons 'def rest)))))
 
+
 (define (ast->string ->iol ast) (iol->string (->iol ast)))
 (define (stmt->string stmt) (ast->string stmt->iol stmt))
 (define (expr->string expr) (ast->string expr->iol expr))
+
 
 (define (ast->iol type ast)
   ((match type
