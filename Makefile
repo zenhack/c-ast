@@ -18,6 +18,7 @@ clean:
 	rm -rf _test_work_* *_gen.[co] \
 		hello-world \
 		cat \
-		wc
+		wc \
+		empty
 %: examples/%.scm
 	guile -L . $<
