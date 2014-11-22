@@ -112,6 +112,14 @@
         "while((x != 4)) (x = 4);"
         '(while (!= x 4) (= x 4)))
       (stmt
+        "while (1) {
+          (x = 1);
+          (y = 2);
+        }"
+        '(while 1
+          (= x 1)
+          (= y 2)))
+      (stmt
         "switch (x) {
            case 4: {
              (x = 1);
