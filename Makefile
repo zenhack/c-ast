@@ -20,4 +20,4 @@ clean:
 		cat \
 		wc
 %: examples/%.scm
-	guile $<
+	guile -L . $<
