@@ -24,3 +24,8 @@ C-Ast is still in a *very* early stage of development -- you can write
 hello world, but it's missing a lot of important features and some
 documentation, and probably isn't packaged the way a guile library
 should be -- I'm still very new to the language.
+
+# Requirements
+
+To run the test suite, you will need an implementation of srfi-64. The
+one I use is: <https://gitorious.org/srfi-64-port>.

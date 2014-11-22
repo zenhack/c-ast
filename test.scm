@@ -15,7 +15,8 @@
 (use-modules (c-ast)
              (iol)
              (ice-9 rdelim)
-             (ice-9 popen))
+             (ice-9 popen)
+             (srfi srfi-64))
 
 (define workdir (format #f "_test_work_~a" (getpid)))
 (mkdir workdir)
@@ -50,180 +51,166 @@
 (define-syntax ast-eq-tests
   (syntax-rules ()
     ((ast-eq-tests (type str ast) ...)
-     (list
-       (lambda ()
-         (let ((istr (indent-iol str))
-               (iast (indent-iol (ast->iol 'type ast))))
-           (if (equal? iast istr)
-             'pass
-             `(ast-eq
-                (input-ast ,ast)
-                (expected ,istr)
-                (actual ,iast))))) ...))))
+     (begin
+       (test-begin "ast-eq-tests")
+         (test-equal (indent-iol str)
+           (indent-iol (ast->iol 'type ast))) ...
+       (test-end "ast-eq-tests")))))
 
 (define-syntax iol-eq-tests
   (syntax-rules ()
     ((iol-eq-tests (expected actual) ...)
-     (list (lambda ()
-             (let ((expected-string (iol->string actual))
-                   (actual-string (iol->string actual)))
-               (if (equal? expected-string actual-string)
-                 'pass
-                 `(iol-eq
-                    (input ,actual)
-                    (expected ,expected-string)
-                    (actual ,actual-string))))) ...))))
+     (begin
+       (test-begin "iol-eq-tests")
+       (test-equal (iol->string expected)
+                   (iol->string actual)) ...
+       (test-end "iol-eq-tests")))))
 
-(define *tests*
-  (append
-    (ast-eq-tests
-      (stmt
-        "(x = 1);"
-        '(= x 1))
-      (stmt
-        "goto fail;"
-        '(goto fail))
-      (stmt
-        "return -1;"
-        '(return -1))
-      (stmt
-       "while ((x>1)) {
-           if (((x % 2) == 0)) {
-               4;
-               (x = 82);
-           } else
-               7;
-       }"
-      '(while (> x 1)
-        (begin
-          (if (== (% x 2) 0)
-              (begin
-                4
-                (= x 82))
-              7))))
-      (stmt
-        "while (1);"
-        '(while 1))
-      (stmt
-        "while (1) {
-        }"
-        '(while 1 (begin)))
-      (stmt
-        "while((x != 4)) (x = 4);"
-        '(while (!= x 4) (= x 4)))
-      (stmt
-        "while (1) {
-          (x = 1);
-          (y = 2);
-        }"
-        '(while 1
+(ast-eq-tests
+  (stmt
+    "(x = 1);"
+    '(= x 1))
+  (stmt
+    "goto fail;"
+    '(goto fail))
+  (stmt
+    "return -1;"
+    '(return -1))
+  (stmt
+   "while ((x>1)) {
+       if (((x % 2) == 0)) {
+           4;
+           (x = 82);
+       } else
+           7;
+   }"
+  '(while (> x 1)
+    (begin
+      (if (== (% x 2) 0)
+          (begin
+            4
+            (= x 82))
+          7))))
+  (stmt
+    "while (1);"
+    '(while 1))
+  (stmt
+    "while (1) {
+    }"
+    '(while 1 (begin)))
+  (stmt
+    "while((x != 4)) (x = 4);"
+    '(while (!= x 4) (= x 4)))
+  (stmt
+    "while (1) {
+      (x = 1);
+      (y = 2);
+    }"
+    '(while 1
+      (= x 1)
+      (= y 2)))
+  (stmt
+    "switch (x) {
+       case 4: {
+         (x = 1);
+         break;
+       } default: {
+         (x = 4);
+       }
+     }"
+     '(switch x
+        (4
           (= x 1)
-          (= y 2)))
-      (stmt
-        "switch (x) {
-           case 4: {
-             (x = 1);
-             break;
-           } default: {
-             (x = 4);
-           }
-         }"
-         '(switch x
-            (4
-              (= x 1)
-              break)
-            (default
-              (= x 4))))
-        (stmt
-          "int x = 1;"
-          '(def x int 1))
-        (stmt
-          "int x;"
-          '(decl x int))
-      (decl
-        "int"
-        'int)
-      (decl
-        "int x"
-        '(decl x int))
-      (decl
-        "int main(void)"
-        '(decl main (func int void)))
-      (decl
-        "int max(int, int)"
-        '(decl max (func int int int)))
-      (decl
-        "int *x"
-        '(decl x (ptr int)))
-      (decl
-        "char **argv"
-        '(decl argv (ptr (ptr char))))
-      (decl
-        "void *malloc()"
-        '(decl malloc (func (ptr void))))
-      (decl
-        "void ptrarg(void *)"
-        '(decl ptrarg (func void (ptr void))))
-      (decl
-        "int main(int argc, char **argv)"
-        '(decl main (func int (argc int) (argv (ptr (ptr char))))))
-      (expr "4" 4)
-      (expr "'c'" #\c)
-      (expr "'\\n'" #\newline)
-      (expr
-        "(x = 1)"
-        '(= x 1))
-      (expr
-        "(1?2:3)"
-        '(if 1 2 3))
-      (expr
-        "(x += 4)"
-        '(+= x 4))
-      (expr
-        "(*(x))"
-        '(* x))
-      (expr
-        "(&(x))"
-        '(& x))
-      (expr
-        "argv[2]"
-        '(@ argv 2))
-      (def
-        "int x = 1;"
-        '(def x int 1))
-      (def
-        "int *x = NULL;"
-        '(def x (ptr int) NULL))
-      (def
-        "int main() {}"
-        '(def main (func int)))
-      (def
-        "int main() {
-          (x = 1);
-         }"
-         '(def main (func int)
-               (= x 1)))
-      (def
-        "int main(void) {
-          return 0;
-        }"
-        '(def main (func int void)
-              (return 0)))
-      (def
-        "int main(void) {
-           (x = 0);
-           (y = 1);
-         }"
-         '(def main (func int void)
-               (= x 0)
-               (= y 1)))
-      (toplevel
-        "int x;"
-        '(decl x int))
-    )
-    (iol-eq-tests
-      ("a,b,c" (join-iol "," '("a" "b" "c")))
-    )))
+          break)
+        (default
+          (= x 4))))
+    (stmt
+      "int x = 1;"
+      '(def x int 1))
+    (stmt
+      "int x;"
+      '(decl x int))
+  (decl
+    "int"
+    'int)
+  (decl
+    "int x"
+    '(decl x int))
+  (decl
+    "int main(void)"
+    '(decl main (func int void)))
+  (decl
+    "int max(int, int)"
+    '(decl max (func int int int)))
+  (decl
+    "int *x"
+    '(decl x (ptr int)))
+  (decl
+    "char **argv"
+    '(decl argv (ptr (ptr char))))
+  (decl
+    "void *malloc()"
+    '(decl malloc (func (ptr void))))
+  (decl
+    "void ptrarg(void *)"
+    '(decl ptrarg (func void (ptr void))))
+  (decl
+    "int main(int argc, char **argv)"
+    '(decl main (func int (argc int) (argv (ptr (ptr char))))))
+  (expr "4" 4)
+  (expr "'c'" #\c)
+  (expr "'\\n'" #\newline)
+  (expr
+    "(x = 1)"
+    '(= x 1))
+  (expr
+    "(1?2:3)"
+    '(if 1 2 3))
+  (expr
+    "(x += 4)"
+    '(+= x 4))
+  (expr
+    "(*(x))"
+    '(* x))
+  (expr
+    "(&(x))"
+    '(& x))
+  (expr
+    "argv[2]"
+    '(@ argv 2))
+  (def
+    "int x = 1;"
+    '(def x int 1))
+  (def
+    "int *x = NULL;"
+    '(def x (ptr int) NULL))
+  (def
+    "int main() {}"
+    '(def main (func int)))
+  (def
+    "int main() {
+      (x = 1);
+     }"
+     '(def main (func int)
+           (= x 1)))
+  (def
+    "int main(void) {
+      return 0;
+    }"
+    '(def main (func int void)
+          (return 0)))
+  (def
+    "int main(void) {
+       (x = 0);
+       (y = 1);
+     }"
+     '(def main (func int void)
+           (= x 0)
+           (= y 1)))
+  (toplevel
+    "int x;"
+    '(decl x int))
+)
 
-(write (filter (lambda (ret) (not (equal? ret 'pass)))
-               (map (lambda (f) (f)) *tests*)))
+    (iol-eq-tests
+      ("a,b,c" (join-iol "," '("a" "b" "c"))))
