@@ -48,3 +48,79 @@ Some exmaples:
 
     (decl x int) --> int x;
     (decl main (func void void)) --> void main(void);
+
+# Definitions
+
+Definitions are similar to declarations, but also include one or more
+"values":
+
+    (def var typ val...)
+
+In the case of variable types, only one value is allowed, which is
+an expression to be assigned to the variable. In the case of functions,
+There may be any number of values, each of which must be a statement.
+Together the values make up the body of the function.
+
+Some examples:
+
+    (def x int 7) --> int x = 7;
+    (def main (func void void) (return 0)) --> void main(void) { return 0; }
+
+# Types
+
+Declarations and definitions require the specification of types. A type
+may be any of the following:
+
+1. A list starting with the symbol `func`, whose second element, and zero
+or more additional elements, are types. The second element is the type
+of the return value, and the remaining elements are the types of the
+arguments. Some examples:
+
+    (decl name (func void void)) --> void name(void);
+    (decl name (func void)) --> void name();
+    (decl name (func int char double)) -> int name(char, double);
+
+2. A three element list,
+
+ * whose first element is the symbol `decl`,
+ * whose second element is a symbol, and
+ * whose third element is a type.
+
+The `(decl ...)` form has the effect of naming the type that it wraps.
+This is mainly of interest in cases where an argument inside of a larger
+declaration (or, more commonly, definition), must have a name. For example:
+
+    (def sum (func int (decl x int) (decl y int))
+      (return (+ x y)))
+
+Yields:
+
+    int sum(int x, int y) {
+        return x + y;
+    }
+
+TODO/IMPLEMENTATION NOTE: The semantics of decl are a bit sublter than
+this, and used internally for various things. This should be explained
+in more detail.
+
+3. A list of the form `(ptr <type>)` where `<type>` is another type.
+This denotes a pointer to the wrapped type.
+
+4. A two element list, the first of which is a symbol, the second of
+which is a type. This is a shorthand for the `decl` form described
+above. The `sum` example could also be written as:
+
+    (def sum (func int (x int) (y int))
+      (return (+ x y)))
+
+Note well: users should be careful not to use this form with a variable
+name that carries special meaning to the library -- as an example,
+`(ptr int)` will be intepreted as "pointer to int," not "int named
+'ptr'". This shorthand should be avoided where collisions are possible.
+
+5. A literal symbol, which will be interpreted as the name of the type,
+e.g. `int`, `float`, `uint32_t`, `myType`. Note that the library knows
+nothing about what types are available -- it is the user's
+responsibility to ensure that the specified types are declared
+somewhere. Otherwise, the error may not be caught until the C compiler
+is invoked.
