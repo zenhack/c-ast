@@ -124,3 +124,163 @@ nothing about what types are available -- it is the user's
 responsibility to ensure that the specified types are declared
 somewhere. Otherwise, the error may not be caught until the C compiler
 is invoked.
+
+Also note: the current implementation does not check that the symbol is
+a valid C identifier; if it is not, the error will not be caught before
+the C compiler is invoked.
+
+# Statements
+
+A statement may be any of the following:
+
+* A list beginning with the symbol `while`, with one or more additional
+  elements. The first element must be an expression, which will be the
+  test in the while statement. Any remaining elements must be
+  statements, which will comprise the body of the while loop.
+
+  Examples:
+
+    (while 1) --> while(1);
+
+    (while (== x 0)) -> while(x == 0);
+
+    (while (< x y)
+       (/= y 2))
+    -->
+    while(x < y)
+        y /= 2;
+
+    (while more_to_do
+        (call do_thing)
+        (-- more_to_do))
+    -->
+    while(more_to_do) {
+        do_thing();
+        --more_to_do;
+    }
+
+* A list beginning with the symbol `begin`, whose remaining elements are
+  statements. This produces a block statement:
+
+    (begin
+        (= x 1)
+        (call printf "%d\n" x))
+    -->
+    {
+        x = 1;
+        printf("%\dn", x);
+    }
+
+* A list containing the symbol `do-while`, a statement, and an
+  expression (in that order). the statement will be the body of a
+  do-while loop, and the expresion will be the test. Right now only one
+  statement is supported, which is inconsistent with the while statement
+  This will change in the future, in a backwards-compatible way. The
+  `begin` statement may be used for multi-statement bodies.
+
+  Examples:
+
+    (do-while (begin) 1) --> do {} while(1);
+
+    (do (begin) (== x 0)) --> do {} while(x == 0);
+
+    (do
+      (/= y 2)
+    (< x y))
+    -->
+    do {
+        y /= 2;
+    } while(x < y);
+
+* An s-expression of the form:
+
+    (for (init test incr)
+        body)
+
+  Where
+
+  * `for` is the literal symbol `for`
+  * `init`, `test`, and `incr`, which are expressions, corresponding to
+    the usual parts of a for loop, and
+  * body is a statement, corresponding to the body of the for loop.
+    Much like the do-while loop, this will be extended to support
+    multiple statements directly in the future, but `begin` may be used
+    as a workaround.
+
+  Examples:
+
+    (for ((= i 0) (< i limit) (++ i))
+        (call printf "%d\n" i))
+    -->
+    for(i = 0; i < limit; ++i) {
+        printf("%d\n, i);
+    }
+
+* A list beginning with the symbol `if`, and having two or more
+  additional elements. It is easier to demonstrate than explain:
+
+
+    (if 1 (= x 0)) --> if(1) x = 0;
+
+    (if 1 (= x 0)
+          (= x 7))
+    -->
+    if(1)
+        x = 0;
+    else
+        x = 7;
+
+    (if 1 (= x 0)
+        2 (= x 7))
+    -->
+    if(1)
+        x = 0;
+    else if(2)
+        x = 7;
+
+    (if 1 (= x 0)
+        2 (= x 7)
+          (= x 3))
+    -->
+    if(1)
+        x = 0;
+    else if(2)
+        x = 7;
+    else
+        x = 3;
+
+
+  More generally,
+
+    (if test stmt) --> if(test) stmt;
+
+    (if test stmtTrue stmtFalse)
+    -->
+    if(test)
+        stmtTrue;
+    else
+        stmtFalse
+
+
+  and,
+
+    (if test1
+      stmt1
+    test2
+      stmt2
+    . rest)
+
+  is the same as:
+
+    (if test1
+      stmt1
+    (if test2
+      stmt2
+    . rest))
+
+* A list starting with the symbol `switch` and an expression, and
+  containing zero or more "cases," each of which is a list starting with
+  either an expression or the symbol `default`, and containing zero or
+  more statements.
+
+  TODO: finish explaining this, and add some examples.
